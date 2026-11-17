@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     redis_url: str = "redis://localhost:6379/0"
 
     gemini_api_key: str = ""
+    gemini_model: str = "gemini-3.8-flash"
     groq_api_key: str = ""
     primary_llm_provider: str = "gemini"
 

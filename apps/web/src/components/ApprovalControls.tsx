@@ -30,9 +30,9 @@ export function ApprovalControls({
         href={prUrl}
         target="_blank"
         rel="noreferrer"
-        className="inline-flex items-center gap-2 rounded-lg border border-emerald-700 bg-emerald-950/70 px-4 py-2 text-sm font-medium text-emerald-200 hover:bg-emerald-900/70"
+        className="inline-flex items-center gap-2 rounded-md border border-[#10B981]/40 bg-[#0F241D] px-4 py-2 text-sm font-medium text-[#10B981] transition hover:bg-[#10B981]/20"
       >
-        View Opened Pull Request <ExternalLink className="h-4 w-4" />
+        View Pull Request <ExternalLink className="h-4 w-4" />
       </a>
     );
   }
@@ -80,7 +80,7 @@ export function ApprovalControls({
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-2.5">
         {canApprove && confirmMode !== "approve" ? (
           <button
             type="button"
@@ -89,7 +89,7 @@ export function ApprovalControls({
               setError(null);
               setConfirmMode("approve");
             }}
-            className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-500 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-md border border-[#EF4444]/40 bg-[#DC2626] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#B91C1C] disabled:opacity-50"
           >
             <Check className="h-4 w-4" />
             Approve &amp; Open PR
@@ -104,26 +104,26 @@ export function ApprovalControls({
               setError(null);
               setConfirmMode("reject");
             }}
-            className="inline-flex items-center gap-2 rounded-lg border border-rose-800 bg-rose-950/60 px-4 py-2 text-sm font-semibold text-rose-200 transition hover:bg-rose-900/70 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-md border border-[#23262F] bg-[#181B22] px-4 py-2 text-sm font-medium text-[#EF4444] transition hover:border-[#EF4444]/50 hover:bg-[#261216] disabled:opacity-50"
           >
             <X className="h-4 w-4" />
-            Reject Patch
+            Reject
           </button>
         ) : null}
       </div>
 
       {confirmMode === "approve" ? (
-        <div className="rounded-xl border border-emerald-800 bg-emerald-950/30 p-4">
-          <p className="text-sm text-emerald-100">
-            Confirm opening a GitHub Pull Request on a new{" "}
-            <code className="font-mono text-emerald-300">patchwork/fix-*</code> branch?
+        <div className="rounded-md border border-[#23262F] bg-[#0B0C0E] p-4">
+          <p className="text-sm text-[#F4F4F5]">
+            Open a GitHub Pull Request on a new{" "}
+            <code className="font-mono text-[#10B981]">patchwork/fix-*</code> branch?
           </p>
           <div className="mt-3 flex items-center gap-2">
             <button
               type="button"
               disabled={submitting}
               onClick={handleApprove}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-500 disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-md bg-[#DC2626] px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-[#B91C1C] disabled:opacity-50"
             >
               {submitting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
               Confirm &amp; Open PR
@@ -132,7 +132,7 @@ export function ApprovalControls({
               type="button"
               disabled={submitting}
               onClick={() => setConfirmMode("none")}
-              className="rounded-lg border border-slate-700 px-3 py-1.5 text-xs text-slate-300 hover:bg-slate-800"
+              className="rounded-md border border-[#23262F] px-3.5 py-1.5 text-xs text-[#9CA3AF] hover:text-[#F4F4F5]"
             >
               Cancel
             </button>
@@ -141,23 +141,23 @@ export function ApprovalControls({
       ) : null}
 
       {confirmMode === "reject" ? (
-        <div className="rounded-xl border border-rose-800 bg-rose-950/30 p-4 space-y-3">
-          <label className="block text-xs font-medium text-rose-200">
-            Rejection reason (recorded in agent traces)
+        <div className="space-y-3 rounded-md border border-[#EF4444]/40 bg-[#0B0C0E] p-4">
+          <label className="block text-xs font-medium text-[#F4F4F5]">
+            Reason for rejecting this patch
           </label>
           <textarea
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             rows={2}
             placeholder="e.g., Should raise ValueError instead of returning 0.0"
-            className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-rose-500 focus:outline-none"
+            className="w-full rounded-md border border-[#23262F] bg-[#13151A] px-3 py-2 text-sm text-[#F4F4F5] placeholder:text-[#9CA3AF] focus:border-[#EF4444] focus:outline-none"
           />
           <div className="flex items-center gap-2">
             <button
               type="button"
               disabled={submitting}
               onClick={handleReject}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-rose-500 disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-md bg-[#EF4444] px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-[#EF4444]/90 disabled:opacity-50"
             >
               {submitting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
               Confirm Reject
@@ -166,7 +166,7 @@ export function ApprovalControls({
               type="button"
               disabled={submitting}
               onClick={() => setConfirmMode("none")}
-              className="rounded-lg border border-slate-700 px-3 py-1.5 text-xs text-slate-300 hover:bg-slate-800"
+              className="rounded-md border border-[#23262F] px-3.5 py-1.5 text-xs text-[#9CA3AF] hover:text-[#F4F4F5]"
             >
               Cancel
             </button>
@@ -175,11 +175,10 @@ export function ApprovalControls({
       ) : null}
 
       {error ? (
-        <p className="rounded-lg border border-red-800 bg-red-950/60 px-3 py-2 text-xs text-red-200">
+        <p className="rounded-md border border-[#EF4444]/40 bg-[#261216] px-3.5 py-2.5 text-xs text-[#EF4444]">
           {error}
         </p>
       ) : null}
     </div>
   );
 }
-

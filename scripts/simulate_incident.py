@@ -24,11 +24,11 @@ async def simulate(
         "error_message": "division by zero",
         "stack_trace": (
             "Traceback (most recent call last):\n"
-            '  File "billing.py", line 7, in calculate_unit_price\n'
+            '  File "demo_target/billing.py", line 7, in calculate_unit_price\n'
             "    return total_amount / quantity\n"
             "ZeroDivisionError: division by zero"
         ),
-        "file_path": "billing.py",
+        "file_path": "demo_target/billing.py",
         "line_number": 7,
     }
 
@@ -77,8 +77,8 @@ async def simulate(
 def main() -> int:
     parser = argparse.ArgumentParser(description="Simulate a Patchwork incident.")
     parser.add_argument("--api-url", default="http://localhost:8000")
-    parser.add_argument("--repo-owner", default="acme")
-    parser.add_argument("--repo-name", default="patchwork-demo")
+    parser.add_argument("--repo-owner", default="ggerrio")
+    parser.add_argument("--repo-name", default="Patchwork")
     parser.add_argument("--base-branch", default="main")
     parser.add_argument("--no-poll", action="store_true", help="Do not poll for completion.")
     args = parser.parse_args()

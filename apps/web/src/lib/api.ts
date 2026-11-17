@@ -3,6 +3,7 @@ import type {
   IncidentDetail,
   IncidentListResponse,
   IncidentStatus,
+  SystemHealthResponse,
 } from "@/types/incident";
 
 const API_BASE =
@@ -24,6 +25,10 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   }
 
   return (await response.json()) as T;
+}
+
+export async function getSystemHealth(): Promise<SystemHealthResponse> {
+  return apiFetch<SystemHealthResponse>("/health");
 }
 
 export async function listIncidents(params?: {
@@ -64,4 +69,3 @@ export async function rejectIncident(
     body: JSON.stringify({ reason }),
   });
 }
-

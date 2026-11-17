@@ -2,6 +2,8 @@ export interface ParsedFileDiff {
   filePath: string;
   oldValue: string;
   newValue: string;
+  addedCount: number;
+  removedCount: number;
 }
 
 function stripPrefix(raw: string): string {
@@ -13,7 +15,7 @@ function stripPrefix(raw: string): string {
 }
 
 /**
- * Parse a unified diff into per-file before/after strings for side-by-side rendering.
+ * Parse a unified diff into per-file before/after strings and line change counts.
  */
 export function parseUnifiedDiff(diffText: string): ParsedFileDiff[] {
   if (!diffText.trim()) {
@@ -34,6 +36,8 @@ export function parseUnifiedDiff(diffText: string): ParsedFileDiff[] {
 
       const oldLines: string[] = [];
       const newLines: string[] = [];
+      let addedCount = 0;
+      let removedCount = 0;
 
       while (i < lines.length && !lines[i].startsWith("--- ") && !lines[i].startsWith("diff --git ")) {
         const hunkLine = lines[i];
@@ -43,8 +47,10 @@ export function parseUnifiedDiff(diffText: string): ParsedFileDiff[] {
         }
         if (hunkLine.startsWith("+")) {
           newLines.push(hunkLine.slice(1));
+          addedCount += 1;
         } else if (hunkLine.startsWith("-")) {
           oldLines.push(hunkLine.slice(1));
+          removedCount += 1;
         } else if (hunkLine.startsWith(" ")) {
           oldLines.push(hunkLine.slice(1));
           newLines.push(hunkLine.slice(1));
@@ -56,6 +62,8 @@ export function parseUnifiedDiff(diffText: string): ParsedFileDiff[] {
         filePath,
         oldValue: oldLines.join("\n"),
         newValue: newLines.join("\n"),
+        addedCount,
+        removedCount,
       });
     } else {
       i += 1;
@@ -64,4 +72,3 @@ export function parseUnifiedDiff(diffText: string): ParsedFileDiff[] {
 
   return files;
 }
-

@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 _TRACEBACK_FRAME_RE = re.compile(r'File\s+"([^"]+)",\s+line\s+(\d+)')
 DEFAULT_DEDUP_TTL_SECONDS = 3600
+DEDUP_BLOCKED_COUNTER_KEY = "patchwork:metrics:duplicates_blocked"
 
 
 def extract_location_from_stack_trace(stack_trace: str) -> tuple[str, int]:
@@ -45,6 +46,8 @@ class IncidentDeduplicator:
         """
         key = self._key(fingerprint)
         acquired = await self._redis.set(key, value, nx=True, ex=self._ttl_seconds)
+        if not acquired and hasattr(self._redis, "incr"):
+            await self._redis.incr(DEDUP_BLOCKED_COUNTER_KEY)
         return bool(acquired)
 
     async def release_lock(self, fingerprint: str) -> None:

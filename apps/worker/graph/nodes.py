@@ -118,9 +118,9 @@ async def _write_trace_row(
     await session.commit()
 
 
-def _build_llm_chat_model() -> object:
+def _build_llm_chat_model(*, force_groq: bool = False) -> object:
     settings = get_settings()
-    provider = settings.primary_llm_provider.lower()
+    provider = "groq" if force_groq else settings.primary_llm_provider.lower()
     if provider == "groq":
         from langchain_groq import ChatGroq
 
@@ -128,14 +128,18 @@ def _build_llm_chat_model() -> object:
             model="llama-3.3-70b-versatile",
             api_key=settings.groq_api_key,
             temperature=0.0,
+            timeout=30.0,
+            max_retries=2,
         )
 
     from langchain_google_genai import ChatGoogleGenerativeAI
 
     return ChatGoogleGenerativeAI(
-        model="gemini-2.5-flash",
+        model=settings.gemini_model,
         google_api_key=settings.gemini_api_key,
         temperature=0.0,
+        timeout=30.0,
+        retries=2,
     )
 
 
@@ -150,9 +154,17 @@ async def default_patch_generator(state: AgentState) -> PatchGenerationResult:
     )
     neighbors_blob = json.dumps(state.get("semantic_neighbors", []), indent=2)
     stderr_section = ""
-    if state.get("sandbox_stderr"):
+    failure_log = "\n".join(
+        part
+        for part in (
+            state.get("sandbox_stderr", "").strip(),
+            state.get("sandbox_stdout", "").strip(),
+        )
+        if part
+    )
+    if failure_log and state.get("retry_count", 0) > 0:
         stderr_section = (
-            f"\nPrevious pytest failure stderr (fix this):\n{state['sandbox_stderr']}\n"
+            f"\nPrevious pytest failure output (fix all failing tests):\n{failure_log}\n"
         )
 
     system_msg = SystemMessage(
@@ -176,7 +188,19 @@ async def default_patch_generator(state: AgentState) -> PatchGenerationResult:
         )
     )
 
-    response = await structured_llm.ainvoke([system_msg, human_msg])
+    try:
+        response = await structured_llm.ainvoke([system_msg, human_msg])
+    except Exception as exc:
+        settings = get_settings()
+        if settings.groq_api_key and settings.primary_llm_provider.lower() != "groq":
+            logger.warning("Primary Gemini LLM failed (%s); falling back to Groq.", exc)
+            fallback_llm = _build_llm_chat_model(force_groq=True)
+            fallback_structured = fallback_llm.with_structured_output(  # type: ignore[attr-defined]
+                PatchProposal, include_raw=True
+            )
+            response = await fallback_structured.ainvoke([system_msg, human_msg])
+        else:
+            raise
     parsed: PatchProposal = response["parsed"]
     raw_msg = response.get("raw")
     usage = getattr(raw_msg, "usage_metadata", None) or {}
@@ -319,17 +343,28 @@ async def retrieve_node(state: AgentState, deps: NodeDependencies) -> AgentState
         github = GitHubClient(token=settings.github_token)
 
     if github is not None and target_file and target_file != "unknown":
-        if target_file not in file_contents:
+        candidate_paths = [target_file]
+        if "/" in target_file:
+            parent_dir, filename = target_file.rsplit("/", 1)
+            candidate_paths.append(f"{parent_dir}/test_{filename}")
+            candidate_paths.append(f"tests/test_{filename}")
+        else:
+            candidate_paths.append(f"test_{target_file}")
+            candidate_paths.append(f"tests/test_{target_file}")
+
+        for path in candidate_paths:
+            if path in file_contents:
+                continue
             try:
                 content = await github.fetch_file_contents(
                     state["repo_owner"],
                     state["repo_name"],
-                    target_file,
+                    path,
                     ref=state.get("base_branch", "main"),
                 )
-                file_contents[target_file] = content
+                file_contents[path] = content
             except Exception as exc:
-                logger.warning("Failed to fetch '%s' from GitHub: %s", target_file, exc)
+                logger.debug("Optional/target file '%s' not fetched from GitHub: %s", path, exc)
 
     neighbors: list[dict[str, object]] = []
     search_fn = deps.neighbor_search or default_neighbor_search

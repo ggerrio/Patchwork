@@ -8,16 +8,16 @@ _ROOT = str(Path(__file__).resolve().parent.parent)
 if _ROOT not in sys.path:
     sys.path.insert(0, _ROOT)
 
-import docker  # noqa: E402
-import httpx  # noqa: E402
-from docker.errors import DockerException  # noqa: E402
-from redis.asyncio import Redis  # noqa: E402
-from redis.exceptions import RedisError  # noqa: E402
-from sqlalchemy import text  # noqa: E402
-from sqlalchemy.exc import SQLAlchemyError  # noqa: E402
+import docker
+import httpx
+from docker.errors import DockerException
+from redis.asyncio import Redis
+from redis.exceptions import RedisError
+from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 
-from apps.api.config import get_settings, parse_arq_redis_settings  # noqa: E402
-from apps.api.database import engine  # noqa: E402
+from apps.api.config import get_settings, parse_arq_redis_settings
+from apps.api.database import engine
 
 
 def check_docker(sandbox_image: str) -> tuple[bool, str]:

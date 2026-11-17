@@ -1,12 +1,32 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { ShieldCheck } from "lucide-react";
+import { Inter, JetBrains_Mono, Oswald } from "next/font/google";
 
 import "./globals.css";
 
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-sans",
+});
+
+const oswald = Oswald({
+  subsets: ["latin"],
+  weight: ["700"],
+  variable: "--font-display",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+});
+
 export const metadata: Metadata = {
-  title: "Patchwork — Autonomous Incident Command Center",
-  description: "Self-healing DevOps copilot dashboard with HITL PR approval",
+  title: "PATCHWORK // AUTONOMOUS OPS COMMAND CENTER",
+  description: "Industrial-Gothic Autonomous Incident Response & Self-Healing DevOps Copilot",
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({
@@ -15,32 +35,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body className="min-h-screen bg-slate-950 text-slate-100 antialiased">
-        <header className="sticky top-0 z-20 border-b border-slate-800/80 bg-slate-950/90 backdrop-blur">
-          <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
-            <Link href="/" className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-500/15 border border-sky-500/30 text-sky-400">
-                <ShieldCheck className="h-5 w-5" />
-              </div>
-              <div>
-                <span className="text-base font-bold tracking-tight text-slate-100">
-                  Patchwork
-                </span>
-                <span className="ml-2 rounded bg-slate-800 px-1.5 py-0.5 font-mono text-[10px] text-slate-400">
-                  COMMAND CENTER
-                </span>
-              </div>
-            </Link>
-            <span className="text-xs text-slate-400">
-              HITL Autonomous Incident Response
-            </span>
-          </div>
-        </header>
-
-        <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">{children}</main>
+    <html
+      lang="en"
+      className={`dark ${inter.variable} ${oswald.variable} ${jetbrainsMono.variable}`}
+    >
+      <body className="min-h-screen bg-[#0A0A0C] text-[#EAEAEF] antialiased selection:bg-[#C81E1E] selection:text-[#EAEAEF]">
+        {children}
       </body>
     </html>
   );
 }
-

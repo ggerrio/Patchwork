@@ -57,3 +57,15 @@ export interface ApprovalActionResponse {
   message: string;
 }
 
+export interface SystemHealthResponse {
+  status: string;
+  database: string;
+  services?: {
+    fastapi: boolean;
+    supabase: boolean;
+    redis: boolean;
+    docker_sandbox: boolean;
+    gemini_api: boolean;
+  };
+  duplicates_blocked?: number;
+}

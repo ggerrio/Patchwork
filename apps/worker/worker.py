@@ -5,7 +5,7 @@ import uuid
 
 from apps.api.config import get_settings, parse_arq_redis_settings
 from apps.api.database import AsyncSessionLocal
-from apps.api.models import Incident, IncidentStatus
+from apps.api.models import AgentTrace, Incident, IncidentStatus
 from apps.worker.graph.state import AgentState
 from apps.worker.graph.workflow import build_workflow
 from sqlalchemy import select
@@ -44,7 +44,27 @@ async def process_incident(ctx: dict[str, object], incident_id_str: str) -> dict
         }
 
     workflow = build_workflow()
-    final_state: AgentState = await workflow.ainvoke(initial_state)
+    try:
+        final_state: AgentState = await workflow.ainvoke(initial_state)
+    except Exception as exc:
+        logger.exception("Workflow execution failed for incident %s: %s", incident_id_str, exc)
+        async with AsyncSessionLocal() as session:
+            result = await session.execute(select(Incident).where(Incident.id == incident_uuid))
+            incident = result.scalar_one_or_none()
+            if incident is not None:
+                incident.status = IncidentStatus.ESCALATED_TO_HUMAN
+                session.add(
+                    AgentTrace(
+                        incident_id=incident.id,
+                        step_name="worker_error",
+                        thought_summary=f"Worker exception escalated to human: {exc}",
+                        tool_output=None,
+                        tokens_used=0,
+                        latency_ms=0,
+                    )
+                )
+                await session.commit()
+        return {"incident_id": incident_id_str, "status": IncidentStatus.ESCALATED_TO_HUMAN.value}
 
     final_status_str = final_state.get("final_status", IncidentStatus.FAILED_MAX_RETRIES.value)
     async with AsyncSessionLocal() as session:

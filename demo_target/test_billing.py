@@ -1,6 +1,9 @@
 """Pytest suite for demo_target/billing.py."""
 
-from billing import apply_discount, calculate_unit_price, format_invoice
+try:
+    from demo_target.billing import apply_discount, calculate_unit_price, format_invoice
+except ImportError:
+    from billing import apply_discount, calculate_unit_price, format_invoice
 
 
 def test_calculate_unit_price_zero_quantity() -> None:
@@ -15,4 +18,3 @@ def test_format_invoice_default_currency() -> None:
 def test_apply_discount_none() -> None:
     assert apply_discount([50.0, 50.0], 10.0) == 90.0
     assert apply_discount([50.0, 50.0], None) == 100.0
-
