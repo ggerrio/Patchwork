@@ -1,0 +1,40 @@
+# Markdown docs
+*.md
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Environment & Secrets
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# Node / Next.js
+apps/web/node_modules/
+apps/web/.next/
+apps/web/out/
+apps/web/npm-debug.log*
+apps/web/next-env.d.ts
+*.tsbuildinfo
+
+# Logs & OS / IDE
+*.log
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
