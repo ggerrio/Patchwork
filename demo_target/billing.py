@@ -3,19 +3,20 @@
 
 def calculate_unit_price(total_amount: float, quantity: int) -> float:
     """Compute unit price for a line item."""
-    # Bug 1: ZeroDivisionError when quantity == 0
+    if quantity == 0:
+        return 0.0
     return total_amount / quantity
 
 
 def format_invoice(payload: dict[str, object]) -> str:
     """Format an invoice summary string."""
-    # Bug 2: KeyError when 'currency' is omitted
-    return f"Invoice #{payload['id']}: {payload['amount']} {payload['currency']}"
+    currency = payload.get('currency', 'USD')
+    return f"Invoice #{payload['id']}: {payload['amount']} {currency}"
 
 
 def apply_discount(prices: list[float], discount_pct: float | None) -> float:
     """Return total after applying an optional percentage discount."""
-    # Bug 3: TypeError when discount_pct is None
     subtotal = sum(prices)
+    if discount_pct is None:
+        return float(subtotal)
     return round(subtotal * (1.0 - discount_pct / 100.0), 2)
-
